@@ -1,0 +1,123 @@
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+// Employee class implementing Serializable
+class Employee implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private int id;
+    private String name;
+    private String designation;
+    private double salary;
+
+    // Constructor
+    public Employee(int id, String name, String designation, double salary) {
+        this.id = id;
+        this.name = name;
+        this.designation = designation;
+        this.salary = salary;
+    }
+
+    // Display employee details
+    public void displayEmployee() {
+        System.out.println("Employee ID: " + id);
+        System.out.println("Name: " + name);
+        System.out.println("Designation: " + designation);
+        System.out.println("Salary: $" + salary);
+        System.out.println("---------------------------");
+    }
+}
+
+public class EmployeeManagement {
+    private static final String FILE_NAME = "employees.ser";
+    private static List<Employee> employeeList = new ArrayList<>();
+
+    public static void main(String[] args) {
+        loadEmployees(); // Load existing employees from the file
+
+        Scanner scanner = new Scanner(System.in);
+        int choice;
+
+        do {
+            System.out.println("\nEmployee Management System");
+            System.out.println("1. Add an Employee");
+            System.out.println("2. Display All Employees");
+            System.out.println("3. Exit");
+            System.out.print("Enter your choice: ");
+            choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    addEmployee(scanner);
+                    break;
+                case 2:
+                    displayAllEmployees();
+                    break;
+                case 3:
+                    saveEmployees(); // Save employees before exiting
+                    System.out.println("Exiting the program.");
+                    break;
+                default:
+                    System.out.println("Invalid choice! Please try again.");
+            }
+        } while (choice != 3);
+
+        scanner.close();
+    }
+
+    // Method to add an employee
+    public static void addEmployee(Scanner scanner) {
+        System.out.print("Enter Employee ID: ");
+        int id = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        System.out.print("Enter Employee Name: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Enter Designation: ");
+        String designation = scanner.nextLine();
+
+        System.out.print("Enter Salary: ");
+        double salary = scanner.nextDouble();
+
+        Employee employee = new Employee(id, name, designation, salary);
+        employeeList.add(employee);
+        System.out.println("Employee added successfully!");
+    }
+
+    // Method to display all employees
+    public static void displayAllEmployees() {
+        if (employeeList.isEmpty()) {
+            System.out.println("No employees found.");
+        } else {
+            System.out.println("\nEmployee Details:");
+            for (Employee emp : employeeList) {
+                emp.displayEmployee();
+            }
+        }
+    }
+
+    // Method to save employees to a file
+    public static void saveEmployees() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
+            oos.writeObject(employeeList);
+        } catch (IOException e) {
+            System.err.println("Error saving employees: " + e.getMessage());
+        }
+    }
+
+    // Method to load employees from a file
+    public static void loadEmployees() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_NAME))) {
+            employeeList = (List<Employee>) ois.readObject();
+        } catch (FileNotFoundException e) {
+            // File may not exist initially, so no need to handle it as an error
+            employeeList = new ArrayList<>();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error loading employees: " + e.getMessage());
+            employeeList = new ArrayList<>();
+        }
+    }
+}
